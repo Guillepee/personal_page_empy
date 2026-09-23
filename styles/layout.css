@@ -1,0 +1,306 @@
+/* ============================================================
+   layout.css
+   Estructura: sidebar fijo + main scrollable.
+   Responsive: en móvil el sidebar se vuelve un header colapsado.
+   ============================================================ */
+
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  min-height: 100vh;
+}
+
+/* ---------- Sidebar ---------- */
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-6) var(--sp-5);
+  background: var(--color-bg-elevated);
+  border-right: 1px solid var(--color-border);
+  /* Nunca hay scroll: el contenido se escala para entrar completo (ver
+     .sidebar__fit y fitSidebar() en el script). overflow:hidden recorta
+     solo subpíxeles del escalado. */
+  overflow: hidden;
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+/* Contenedor del contenido de la sidebar. Se escala con --sidebar-scale
+   (calculado por JS) para que todo entre sin scroll en cualquier altura. */
+.sidebar__fit {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  transform-origin: top center;
+  transform: scale(var(--sidebar-scale, 1));
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+  padding: 0 var(--sp-2);
+}
+
+/* Selector de idioma: debajo del brand y sobre el nav (visible al entrar).
+   Mismo padding lateral que brand/nav para alinear, y separación con el nav. */
+.sidebar__langs {
+  display: flex;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-2);
+  margin-bottom: var(--sp-5);
+}
+
+.sidebar__brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  display: grid;
+  place-items: center;
+  color: var(--color-bg-elevated);
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  font-style: italic;
+  flex-shrink: 0;
+}
+
+.sidebar__brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.sidebar__brand-name {
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-medium);
+  color: var(--color-text);
+  letter-spacing: var(--tracking-tight);
+}
+
+.sidebar__brand-role {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-text-faint);
+  letter-spacing: var(--tracking-wide);
+  margin-top: 2px;
+}
+
+.sidebar__nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.sidebar__nav-section {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-text-faint);
+  padding: var(--sp-3) var(--sp-3) var(--sp-2);
+  margin-top: var(--sp-3);
+}
+
+.sidebar__nav-section:first-child {
+  margin-top: 0;
+}
+
+/* Botón "Descargar CV en PDF": ancho completo, debajo del nav. */
+.sidebar__download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  width: 100%;
+  margin-top: var(--sp-4);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--tracking-wide);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.sidebar__download:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* Mientras genera el PDF (clase la pone pdf-export.js). */
+.sidebar__download.is-loading {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.sidebar__download svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.sidebar__footer {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.sidebar__footer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.sidebar__footer-modes,
+.sidebar__footer-specials {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.sidebar__footer-text {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-text-faint);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* En pixel8 la sidebar usa una escala propia (mayor que la del cuerpo): sus
+   textos son cortos y no sufren el wrapping del contenido, así que pueden ser
+   más grandes para verse comparables a la sidebar de los otros temas. El
+   escalado dinámico (fitSidebar) se encarga de que igual entre todo. */
+[data-theme="pixel8"] .sidebar {
+  --fs-md: 0.82rem;
+  --fs-sm: 0.68rem;
+  --fs-xs: 0.55rem;
+}
+
+/* En NYT los titulares usan blackletter (masthead gótico): la cursiva del
+   diseño base sería un faux-italic ilegible, así que se fuerza a recto. */
+[data-theme="nyt"] .section__title,
+[data-theme="nyt"] .hero__name em {
+  font-style: normal;
+}
+
+/* ---------- Main ---------- */
+
+.main {
+  min-width: 0;
+  padding: var(--sp-9) var(--content-padding) var(--sp-10);
+}
+
+.main__inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.section {
+  padding-block: var(--sp-9);
+  scroll-margin-top: var(--sp-6);
+}
+
+.section:first-of-type {
+  padding-top: 0;
+}
+
+.section + .section {
+  border-top: 1px solid var(--color-border);
+}
+
+.section__eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-accent);
+  margin-bottom: var(--sp-3);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.section__eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 1px;
+  background: var(--color-accent);
+}
+
+.section__title {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-regular);
+  font-style: italic;
+  margin-bottom: var(--sp-2);
+}
+
+.section__lede {
+  font-size: var(--fs-md);
+  color: var(--color-text-muted);
+  max-width: 56ch;
+  margin-bottom: var(--sp-7);
+}
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 900px) {
+  .app {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: relative;
+    height: auto;
+    min-height: auto;
+    padding: var(--sp-5);
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .sidebar__brand {
+    margin-bottom: var(--sp-5);
+  }
+
+  .sidebar__nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+
+  .sidebar__nav-section {
+    display: none;
+  }
+
+  .sidebar__footer {
+    margin-top: var(--sp-5);
+    padding-top: var(--sp-5);
+  }
+
+  .main {
+    padding: var(--sp-7) var(--sp-5) var(--sp-9);
+  }
+
+  .section {
+    padding-block: var(--sp-7);
+  }
+}
